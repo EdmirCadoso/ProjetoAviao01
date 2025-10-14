@@ -21,8 +21,7 @@ class AuthController extends Controller
         $credentials = $request->validate(
             [
                 'username'=> 'required|min:3|max:30',
-                'password' => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z](?=.*\d).*$/*'
-            ],
+                'password' => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/'            ],
             [
                 'username.required' => 'O utilizador é obrigatório',
                 'username.min' => 'O utilizador deve ter no mínimo :min caracteres',
@@ -47,14 +46,16 @@ class AuthController extends Controller
 
         // verificar se o user existe
         if(!$user){
+            print("chegou");
             return back()->withInput()->with([
                 'invalid_login' => 'Login inválido'
             ]);
         }
         // verificar se a password é valida
-        if(!password_verify($credentials['username'], $user->password )){
+        if(!password_verify($credentials['password'], $user->password )){
+
                return back()->withInput()->with([
-                'invalid_login' => 'Login inválido'
+                'invalid_login' => 'Password inválido'
             ]);
         }
         // atualizar ultimo login (last_login_at)
