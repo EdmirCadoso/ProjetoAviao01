@@ -191,10 +191,75 @@ class AuthController extends Controller
                 'new_password.min' => 'A nova password deve conter no mínimo :min caracteres',
                 'new_password.max' => 'A nova password deve conter no maximo :max caracteres',
                 'new_password.regex' => 'O nova password deve conter pelo menos uma letra maiúscula, uma letra minuscula  e um numero',
-                'new_password.different' => 'A nova password deve ser diferente da password atual ',
+                'new_password.different' => 'A nova password deve ser diferente da password atual',
+                'new_password_confirmation.required' => 'A confirmação da nova password é obrigatória',
+                'new_password_confirmation.same' => 'A confirmação da password deve ser igual a nova password',
             ]
         );
 
-        echo 'change_password';
+        // verificar se a password atual (current_password) está correta
+        if(!password_verify($request->current_password, Auth::user()->password)){
+            return back()->with([
+                'server_error' => "A password atual não está correta"
+            ]);
+        }
+
+        // atualizar a password na base de dados
+        $user = Auth::user();
+        $user->password = bcrypt($request->new_password);
+        echo 'ok';
+        $user->save();
+
+        // atualizar a password na sessão
+        Auth::user()->password = $request->new_password;
+
+        //apresenta msm sucesso
+        return redirect()->route('profile')->with([
+        'success' => "A password foi atualizada com sucesso"
+    ]);
+    }
+
+    public function forgot_password():View
+    {
+        return view('auth.forgot_password');
+    }
+
+    public function send_reset_password_link(Request $request)
+    {
+        // form validation
+        $request -> validate(
+            [
+                'email' => 'required|email',
+            ],
+            [
+                'email.required'=> 'O email é obrigatório',
+                'email.email'=> 'O email deve ser um endereço de email válido.'
+            ]
+
+        );
+
+        $generic_message = "Verifique a sua caixa de correio para prosseguir com a recuperação de password.";
+
+        // verificar se email existe
+        $user = User::where('email', $request->email)->first();
+        if(!$user){
+            return back()->with([
+                'server_message' => $generic_message
+            ]);
+        }
+
+        // criar o link com token para enviar no email
+        $user->token = Str::random(64);
+
+        $token_link = route('reset_password', ['token' => $user->token]);
+
+        // envio de email com link para recuperar a password
+        // $result = Mail::to($request->user())->send(new MailableClass);
+
+         return back()->with([
+                'server_message' => $generic_message
+            ]);
+
+
     }
 }

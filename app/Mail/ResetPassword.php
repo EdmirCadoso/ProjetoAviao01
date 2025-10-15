@@ -10,14 +10,14 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NewUserConfirmation extends Mailable
+class ResetPassword extends Mailable
 {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(public $username, public $confirmation_link)
+    public function __construct(public $username, public $token_link)
     {
         //
     }
@@ -28,8 +28,8 @@ class NewUserConfirmation extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('laravel@gmail.com', 'laravel'),
-            subject: 'Confirmação de cadastro',
+            from: new Address('laravel@gmail.com', 'Laravel'),
+            subject: 'Recuperação de Password',
         );
     }
 
@@ -39,7 +39,7 @@ class NewUserConfirmation extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'main.reset_password',
+            view: 'view.name',
         );
     }
 

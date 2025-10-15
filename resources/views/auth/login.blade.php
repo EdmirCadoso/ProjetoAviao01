@@ -26,11 +26,11 @@
 
                         <div class="row mt-4">
                             <div class="col">
-                                {{-- {{-- <div class="mb-3">
-                                    <a href="#">Não tenho conta de usuário</a>
-                                </div> --}}
+                                 <div class="mb-3">
+                                    <a href="{{ route('register')}}">Não tenho conta de utilizador</a>
+                                </div>
                                 <div>
-                                    <a href="{{ route('register')}}">Esqueci a minha senha</a>
+                                    <a href="{{ route('forgot_password')}}">Esqueci a minha palavra-passe</a>
                                 </div>
                             </div>
                             <div class="col text-end align-self-center">
