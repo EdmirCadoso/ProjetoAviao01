@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewUserConfirmation;
 use App\Models\User;
-
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Redirect;
 
 class AuthController extends Controller
 {
@@ -15,7 +20,7 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function authenticate(Request $request)
+    public function authenticate(Request $request): RedirectResponse
     {
         //form validation
         $credentials = $request->validate(
@@ -71,5 +76,125 @@ class AuthController extends Controller
         return redirect()->intended(route('home'));
 
 
+    }
+
+    public function logout(): RedirectResponse
+    {
+        //logout
+        Auth::logout();
+        return redirect()->route('login');
+    }
+
+    public function register(): View
+    {
+        return view('auth.register');
+    }
+
+    public function store_user(Request $request): RedirectResponse|View
+    {
+        // form validation
+        $request->validate(
+            [
+                'username' => 'required|min:3|max:30|unique:users,username',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/',
+                'password_confirmation' => 'required|same:password',
+            ],
+            [
+                'username.required' => 'O utilizador é obrigatório',
+                'username.min' => 'O utilizador deve ter no mínimo :min caracteres',
+                'username.max' => 'O utilizador deve ter no maximo :max caracteres',
+                'username.unique' => 'Este nome não pode ser usado',
+                'email.required' => 'O email é obrigatório',
+                'email.email' => 'O email deve ser um endereço do email válido',
+                'email.unique' => 'Este email não pode ser usado',
+                'password.required' => 'A password é obrigatória',
+                'password.min' => 'A password  deve conter no mínimo :min caracteres',
+                'password.max' => 'A password  deve conter no maximo :max caracteres',
+                'password.regex' => 'O utilizador deve conter pelo menos uma letra maiúscula, uma letra minuscula  e um numero',
+                'password_confirmation.required' => 'A confirmação da password é obrigatória',
+                'password_confirmation.same' => 'A confirmação da password deve ser igual a password',
+            ]
+        );
+
+        // vamos criar um novo user definindo um token de verificação de email
+        $user = new User();
+        $user->username = $request->username;
+        $user->email = $request->email;
+        $user->password = bcrypt($request->password);
+        $user->token = Str::random(64);
+
+        // gerar link
+        $confirmation_link = route('new_user_confirmation', ['token' => $user->token]);
+
+        // enviar email
+        $result = Mail::to($user->email)->send(new NewUserConfirmation($user->username, $confirmation_link ));
+
+        // verificar se o email foi enviado com sucesso
+        if(!$result){
+            return back()->withInput()->with([
+                'server_error' => 'Ocorreu um erro ao enviar o email de confirmação.'
+            ]);
+        }
+
+        // criar o utilizador na base de dados
+        $user->save();
+
+        // apresentar view de sucesso
+        return view('auth.email_sent', ['email' => $user->email]);
+        // dd($user );
+
+        // definir novo user
+
+    }
+
+    public function new_user_confirmation($token)
+    {
+        //verificar se o token é válido
+        $user = User::where('token', $token)->first();
+        if(!$user){
+            return redirect()->route('login');
+        }
+
+        // confirmar o registo do usúario
+        $user->email_verified_at = Carbon::now();
+        $user->token = null;
+        $user->active = true;
+        $user->save();
+
+        // autenticação automática (login) do utilizador confirmado
+        Auth::login($user);
+
+        // apresenta uma mensagem de sucesso
+        return view('auth.new_user_confirmation');
+    }
+
+    public function profile(): View
+    {
+        return view('auth.profile');
+    }
+
+    public function change_password(Request $request)
+    {
+        $request->validate(
+            [
+                'current_password'=> 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/',
+                'new_password' => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/|different:current_password',
+                'new_password_confirmation' => 'required|same:new_password',
+            ],
+            [
+                'current_password.required' => 'A password atual é obrigatória',
+                'current_password.min' => 'A password atual deve conter no mínimo :min caracteres',
+                'current_password.max' => 'A password atual deve conter no maximo :max caracteres',
+                'current_password.regex' => 'O password atual deve conter pelo menos uma letra maiúscula, uma letra minuscula  e um numero',
+                'new_password.required' => 'A nova password atual é obrigatória',
+                'new_password.min' => 'A nova password deve conter no mínimo :min caracteres',
+                'new_password.max' => 'A nova password deve conter no maximo :max caracteres',
+                'new_password.regex' => 'O nova password deve conter pelo menos uma letra maiúscula, uma letra minuscula  e um numero',
+                'new_password.different' => 'A nova password deve ser diferente da password atual ',
+            ]
+        );
+
+        echo 'change_password';
     }
 }

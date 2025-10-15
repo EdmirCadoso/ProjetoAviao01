@@ -12,7 +12,9 @@
 </head>
 
 <body>
-
+    @auth
+        <x-user-bar/>
+    @endauth
     <!-- content -->
     {{ $slot}}
 

@@ -9,7 +9,7 @@
                         @csrf
                         <div class="mb-3">
                             <label for="username" class="form-label">Utilizador</label>
-                            <input type="text" class="form-control" id="username" name="username">
+                            <input type="text" class="form-control" id="username" name="username" value="{{old ('username')}}">
                             @error('username')
                                 <div class="text-danger">{{ $message}}</div>
                             @enderror
@@ -26,12 +26,12 @@
 
                         <div class="row mt-4">
                             <div class="col">
-                                {{-- <div class="mb-3">
+                                {{-- {{-- <div class="mb-3">
                                     <a href="#">Não tenho conta de usuário</a>
-                                </div>
-                                <div>
-                                    <a href="#">Esqueci a minha senha</a>
                                 </div> --}}
+                                <div>
+                                    <a href="{{ route('register')}}">Esqueci a minha senha</a>
+                                </div>
                             </div>
                             <div class="col text-end align-self-center">
                                 <button type="submit" class="btn btn-secondary px-5">ENTRAR</button>
