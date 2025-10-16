@@ -29,7 +29,19 @@ Route::middleware('guest')->group(function(){
 });
 
 Route::middleware('auth')->group(function(){
+
+    // Novo aviao
     Route::get('/', [MainController::class, 'home'])->name('home');
+    Route::get('/newAviao', [MainController::class, 'newAviao'])->name('new');
+    Route::post('/newAviaoSubmit', [MainController::class, 'newAviaoSubmit'])->name('newAviaoSubmit');
+
+    // Editar aviao
+    Route::get('/editAviao/{id}', [MainController::class, 'editAviao'])->name('edit');
+    Route::post('/editAviaoSubmit', [MainController::class, 'editAviaoSubmit'])->name('editAviaoSubmit');
+
+    // Deletar aviao
+    Route::get('/deleteAviao/{id}', [MainController::class, 'deleteAviao'])->name('delete');
+    Route::get('/deleteAviaoConfirm/{id}', [MainController::class, 'deleteAviaoConfirm'])->name('deleteConfirm');
 
     // profile - change password
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');

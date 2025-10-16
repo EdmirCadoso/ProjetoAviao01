@@ -1,10 +1,10 @@
-<x-layouts.main-layout pageTitle="Registar Avião">
+<x-layouts.main-layout pageTitle="Editar Avião">
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-6">
                 <div class="row">
                     <div class="col">
-                        <p class="display-6 mb-0">Registrar Avião</p>
+                        <p class="display-6 mb-0">Editar Avião</p>
                     </div>
                     <div class="col text-end">
                         <a href="{{ route('home') }}" class="btn btn-outline-danger">
@@ -12,35 +12,34 @@
                         </a>
                     </div>
                 </div>
-                <form action="{{ route('newAviaoSubmit') }}" method="post">
+                <form action="{{ route('editAviaoSubmit') }}" method="post">
                     @csrf
-
-
+                    <input type="hidden" name="avion_id" value="{{Crypt::encrypt($aviao->id)}}">
                     {{-- Upload centralizado (círculo/retângulo) --}}
                     <div class="mb-3">
                         <label for="name" class="form-label">Nome do Avião</label>
-                        <input type="text" class="form-control" id="name" name="name">
+                        <input type="text" class="form-control" id="name" name="name" value="{{old('name', $aviao->nome)}}">
                         @error('name')
                             <div class="text-danger">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="mb-3">
                         <label for="model" class="form-label">Modelo</label>
-                        <input type="text" class="form-control" id="model" name="model">
+                        <input type="text" class="form-control" id="model" name="model" value="{{old('model', $aviao->model)}}">
                         @error('model')
                             <div class="text-danger">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="mb-3">
                         <label for="airline" class="form-label">Companhia Aérea</label>
-                        <input type="text" class="form-control" id="airline" name="airline">
+                        <input type="text" class="form-control" id="airline" name="airline" value="{{old('airline', $aviao->airline)}}">
                         @error('airline')
                             <div class="text-danger">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="mb-3">
                         <label for="capacity" class="form-label">Capacidade</label>
-                        <input type="number" class="form-control" id="capacity" name="capacity">
+                        <input type="number" class="form-control" id="capacity" name="capacity" value="{{old('capacity', $aviao->capacity)}}">
                         @error('capacity')
                             <div class="text-danger">{{ $message }}</div>
                         @enderror
@@ -64,7 +63,7 @@
                         <div class="col text-end">
                             <a href="{{ route('home') }}" class="btn btn-primary px-5"><i
                                     class="fa-solid fa-ban me-2"></i>Cancel</a>
-                            <button type="submit" class="btn btn-secondary px-5">Guardar</button>
+                            <button type="submit" class="btn btn-secondary px-5">Update</button>
                         </div>
                     </div>
 
